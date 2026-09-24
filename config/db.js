@@ -2,7 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 
-const DATA_FILE = path.join(__dirname, '..', 'data', 'store.json');
+const isServerless = Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NETLIFY || process.env.LAMBDA_TASK_ROOT);
+const DEFAULT_DATA_FILE = path.join(__dirname, '..', 'data', 'store.json');
+const DATA_FILE = isServerless ? path.join('/tmp', 'store.json') : DEFAULT_DATA_FILE;
 
 const todayStr = new Date().toISOString().split('T')[0];
 const tomorrow = new Date();
@@ -522,7 +524,15 @@ if (!fs.existsSync(dataDir)) {
 
 // Reset or populate if not existing
 if (!fs.existsSync(DATA_FILE)) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(initialData(), null, 2));
+  if (isServerless && fs.existsSync(DEFAULT_DATA_FILE)) {
+    try {
+      fs.copyFileSync(DEFAULT_DATA_FILE, DATA_FILE);
+    } catch (e) {
+      fs.writeFileSync(DATA_FILE, JSON.stringify(initialData(), null, 2));
+    }
+  } else {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(initialData(), null, 2));
+  }
 }
 
 const getDb = () => {
