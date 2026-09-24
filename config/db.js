@@ -14,6 +14,16 @@ const initialData = () => {
   const farmerPasswordHash = bcrypt.hashSync('farmer123', salt);
   const adminPasswordHash = bcrypt.hashSync('admin123', salt);
 
+  // Use authoritative MSP values from mspConfig
+  const { getCropMspPrice } = require('./mspConfig');
+  const wheatMsp = getCropMspPrice('Wheat');         // 2585
+  const soybeanMsp = getCropMspPrice('Soybean');     // 5708
+  const cottonMsp = getCropMspPrice('Cotton');        // 8267
+  const gramMsp = getCropMspPrice('Gram (Chana)');   // 5875
+  const riceMsp = getCropMspPrice('Rice (Paddy - Grade A)'); // 2461
+
+  const dateCompact = todayStr.replace(/-/g, '');
+
   return {
     users: [
       {
@@ -158,7 +168,7 @@ const initialData = () => {
         district: 'Nashik',
         contactPhone: '+91 94220 12345',
         cropType: 'Wheat',
-        mspPrice: 2425,
+        mspPrice: wheatMsp,
         status: 'Active'
       },
       {
@@ -169,7 +179,7 @@ const initialData = () => {
         district: 'Pune',
         contactPhone: '+91 94220 54321',
         cropType: 'Soybean',
-        mspPrice: 4950,
+        mspPrice: soybeanMsp,
         status: 'Active'
       },
       {
@@ -180,7 +190,7 @@ const initialData = () => {
         district: 'Nagpur',
         contactPhone: '+91 94220 98765',
         cropType: 'Cotton',
-        mspPrice: 7121,
+        mspPrice: cottonMsp,
         status: 'Active'
       }
     ],
@@ -195,9 +205,9 @@ const initialData = () => {
         startTime: '09:00 AM',
         endTime: '11:00 AM',
         cropType: 'Wheat',
-        mspPrice: 2425,
-        capacity: 20,
-        bookedCount: 15,
+        mspPrice: wheatMsp,
+        capacity: 25,
+        bookedCount: 5,
         status: 'Available'
       },
       {
@@ -210,9 +220,9 @@ const initialData = () => {
         startTime: '11:00 AM',
         endTime: '01:00 PM',
         cropType: 'Wheat',
-        mspPrice: 2425,
+        mspPrice: wheatMsp,
         capacity: 20,
-        bookedCount: 19,
+        bookedCount: 3,
         status: 'Available'
       },
       {
@@ -225,10 +235,10 @@ const initialData = () => {
         startTime: '01:00 PM',
         endTime: '03:00 PM',
         cropType: 'Wheat',
-        mspPrice: 2425,
+        mspPrice: wheatMsp,
         capacity: 15,
-        bookedCount: 15,
-        status: 'Full'
+        bookedCount: 2,
+        status: 'Available'
       },
       {
         id: 'sch_4',
@@ -240,9 +250,9 @@ const initialData = () => {
         startTime: '09:00 AM',
         endTime: '11:00 AM',
         cropType: 'Wheat',
-        mspPrice: 2425,
+        mspPrice: wheatMsp,
         capacity: 25,
-        bookedCount: 8,
+        bookedCount: 0,
         status: 'Available'
       },
       {
@@ -255,18 +265,49 @@ const initialData = () => {
         startTime: '10:00 AM',
         endTime: '12:00 PM',
         cropType: 'Soybean',
-        mspPrice: 4950,
+        mspPrice: soybeanMsp,
         capacity: 30,
-        bookedCount: 12,
+        bookedCount: 2,
+        status: 'Available'
+      },
+      {
+        id: 'sch_6',
+        centreId: 'pc_3',
+        centreName: 'Nagpur Cotton & Pulses Hub',
+        centreLocation: 'Kalamna Market, Nagpur',
+        centreAddress: 'Kalamna Market, Cotton & Pulses Section, Nagpur, Maharashtra 440035',
+        date: todayStr,
+        startTime: '09:00 AM',
+        endTime: '12:00 PM',
+        cropType: 'Cotton',
+        mspPrice: cottonMsp,
+        capacity: 20,
+        bookedCount: 1,
+        status: 'Available'
+      },
+      {
+        id: 'sch_7',
+        centreId: 'pc_2',
+        centreName: 'Pune Krishi Utpadan Mandi',
+        centreLocation: 'Market Yard, Pune',
+        centreAddress: 'Krishi Utpadan Mandi Samiti, Market Yard Road, Gultekdi, Pune, Maharashtra 411037',
+        date: tomorrowStr,
+        startTime: '10:00 AM',
+        endTime: '12:00 PM',
+        cropType: 'Soybean',
+        mspPrice: soybeanMsp,
+        capacity: 30,
+        bookedCount: 0,
         status: 'Available'
       }
     ],
     bookings: [
+      // Booking that already went through full pipeline (Paid) — for Farmer 3 (Mahesh Shinde)
       {
         id: 'bk_97',
-        farmerId: 'usr_other1',
-        farmerName: 'Ganesh Pawar',
-        farmerPhone: '9123456701',
+        farmerId: 'usr_f3',
+        farmerName: 'Mahesh Shinde',
+        farmerPhone: '9876543212',
         centreId: 'pc_1',
         centreName: 'Nashik APMC Main Market',
         centreLocation: 'Panchavati, Nashik',
@@ -274,19 +315,21 @@ const initialData = () => {
         scheduleId: 'sch_1',
         date: todayStr,
         timeSlot: '09:00 AM - 11:00 AM',
-        cropType: 'Soybean',
-        quantity: '40 Quintals',
-        approxQuantity: 40,
-        actualQuantity: 38.5,
-        mspPerQuintal: 4950,
-        totalAmount: 190575,
+        cropType: 'Wheat',
+        quantity: '35 Quintals',
+        approxQuantity: 35,
+        actualQuantity: 33.5,
+        mspPerQuintal: wheatMsp,
+        totalAmount: Math.round(33.5 * wheatMsp * 100) / 100,
         tokenNumber: 'KC-097',
         queueNumber: 97,
-        status: 'Procurement In Progress',
-        paymentStatus: 'pending_procurement',
-        amount: 0,
+        status: 'Paid',
+        paymentStatus: 'paid',
+        paymentId: 'PAY-097',
+        amount: Math.round(33.5 * wheatMsp * 100) / 100,
         createdAt: new Date(Date.now() - 7200000).toISOString()
       },
+      // Booking in Procurement In Progress — for other farmer (queue demo)
       {
         id: 'bk_98',
         farmerId: 'usr_other2',
@@ -302,13 +345,15 @@ const initialData = () => {
         cropType: 'Wheat',
         quantity: '25 Quintals',
         approxQuantity: 25,
+        mspPerQuintal: wheatMsp,
         tokenNumber: 'KC-098',
         queueNumber: 98,
-        status: 'Your Turn Soon',
+        status: 'Procurement In Progress',
         paymentStatus: 'pending_procurement',
         amount: 0,
         createdAt: new Date(Date.now() - 6500000).toISOString()
       },
+      // Waiting — for another farmer (queue demo)
       {
         id: 'bk_99',
         farmerId: 'usr_other3',
@@ -324,6 +369,7 @@ const initialData = () => {
         cropType: 'Gram (Chana)',
         quantity: '30 Quintals',
         approxQuantity: 30,
+        mspPerQuintal: gramMsp,
         tokenNumber: 'KC-099',
         queueNumber: 99,
         status: 'Waiting',
@@ -331,84 +377,139 @@ const initialData = () => {
         amount: 0,
         createdAt: new Date(Date.now() - 5000000).toISOString()
       },
+      // Paid booking for Suresh Deshmukh (usr_f2) so he has payment history
       {
-        id: 'bk_104',
-        farmerId: 'usr_f1',
-        farmerName: 'Ramesh Patil',
-        farmerPhone: '9876543210',
-        centreId: 'pc_1',
-        centreName: 'Nashik APMC Main Market',
-        centreLocation: 'Panchavati, Nashik',
-        centreAddress: 'APMC Market Yard, Panchavati Road, Nashik, Maharashtra 422003',
-        scheduleId: 'sch_1',
+        id: 'bk_100',
+        farmerId: 'usr_f2',
+        farmerName: 'Suresh Deshmukh',
+        farmerPhone: '9876543211',
+        centreId: 'pc_2',
+        centreName: 'Pune Krishi Utpadan Mandi',
+        centreLocation: 'Market Yard, Pune',
+        centreAddress: 'Krishi Utpadan Mandi Samiti, Market Yard Road, Gultekdi, Pune, Maharashtra 411037',
+        scheduleId: 'sch_5',
         date: todayStr,
-        timeSlot: '09:00 AM - 11:00 AM',
-        cropType: 'Wheat',
-        quantity: '30 Quintals',
-        approxQuantity: 30,
-        actualQuantity: 28.5,
-        mspPerQuintal: 2425,
-        totalAmount: 69112.5,
-        tokenNumber: 'KC-104',
-        queueNumber: 104,
+        timeSlot: '10:00 AM - 12:00 PM',
+        cropType: 'Soybean (Yellow)',
+        quantity: '22 Quintals',
+        approxQuantity: 22,
+        actualQuantity: 21.5,
+        mspPerQuintal: soybeanMsp,
+        totalAmount: Math.round(21.5 * soybeanMsp * 100) / 100,
+        tokenNumber: 'KC-100',
+        queueNumber: 100,
         status: 'Paid',
         paymentStatus: 'paid',
-        paymentId: 'PAY-104',
-        amount: 69112.5,
-        createdAt: new Date(Date.now() - 600000).toISOString()
+        paymentId: 'PAY-100',
+        amount: Math.round(21.5 * soybeanMsp * 100) / 100,
+        createdAt: new Date(Date.now() - 3600000).toISOString()
+      },
+      // Active booking for Amit Joshi (usr_f6) — waiting in queue at Nagpur
+      {
+        id: 'bk_101',
+        farmerId: 'usr_f6',
+        farmerName: 'Amit Joshi',
+        farmerPhone: '9876543215',
+        centreId: 'pc_3',
+        centreName: 'Nagpur Cotton & Pulses Hub',
+        centreLocation: 'Kalamna Market, Nagpur',
+        centreAddress: 'Kalamna Market, Cotton & Pulses Section, Nagpur, Maharashtra 440035',
+        scheduleId: 'sch_6',
+        date: todayStr,
+        timeSlot: '09:00 AM - 12:00 PM',
+        cropType: 'Cotton (Medium Staple)',
+        quantity: '18 Quintals',
+        approxQuantity: 18,
+        mspPerQuintal: cottonMsp,
+        tokenNumber: 'KC-101',
+        queueNumber: 101,
+        status: 'Booking Confirmed',
+        paymentStatus: 'pending_procurement',
+        amount: 0,
+        createdAt: new Date(Date.now() - 2400000).toISOString()
       }
     ],
     payments: [
       {
-        id: 'PAY-104',
-        bookingId: 'bk_104',
-        farmerId: 'usr_f1',
-        farmerName: 'Ramesh Patil',
+        id: 'PAY-097',
+        bookingId: 'bk_97',
+        farmerId: 'usr_f3',
+        farmerName: 'Mahesh Shinde',
         centreId: 'pc_1',
         centreName: 'Nashik APMC Main Market',
         centreLocation: 'Panchavati, Nashik',
         centreAddress: 'APMC Market Yard, Panchavati Road, Nashik, Maharashtra 422003',
         cropType: 'Wheat',
-        approxQuantity: '30 Quintals',
-        actualQuantity: 28.5,
-        mspPerQuintal: 2425,
-        totalAmount: 69112.5,
-        amount: 69112.5,
+        approxQuantity: 35,
+        actualQuantity: 33.5,
+        mspPerQuintal: wheatMsp,
+        totalAmount: Math.round(33.5 * wheatMsp * 100) / 100,
+        amount: Math.round(33.5 * wheatMsp * 100) / 100,
         currency: 'INR',
         status: 'paid',
         paymentStatus: 'PAID',
         paymentDate: todayStr,
-        transactionReference: 'KC-PAY-20260906-001',
+        transactionReference: `KC-PAY-${dateCompact}-001`,
         paymentMethod: 'Government Direct Benefit Transfer (Demo)',
-        createdAt: new Date(Date.now() - 600000).toISOString(),
-        verifiedAt: new Date(Date.now() - 590000).toISOString()
+        createdAt: new Date(Date.now() - 7000000).toISOString(),
+        verifiedAt: new Date(Date.now() - 6900000).toISOString(),
+        scheduleDate: todayStr,
+        timeSlot: '09:00 AM - 11:00 AM',
+        tokenNumber: 'KC-097'
+      },
+      {
+        id: 'PAY-100',
+        bookingId: 'bk_100',
+        farmerId: 'usr_f2',
+        farmerName: 'Suresh Deshmukh',
+        centreId: 'pc_2',
+        centreName: 'Pune Krishi Utpadan Mandi',
+        centreLocation: 'Market Yard, Pune',
+        centreAddress: 'Krishi Utpadan Mandi Samiti, Market Yard Road, Gultekdi, Pune, Maharashtra 411037',
+        cropType: 'Soybean (Yellow)',
+        approxQuantity: 22,
+        actualQuantity: 21.5,
+        mspPerQuintal: soybeanMsp,
+        totalAmount: Math.round(21.5 * soybeanMsp * 100) / 100,
+        amount: Math.round(21.5 * soybeanMsp * 100) / 100,
+        currency: 'INR',
+        status: 'paid',
+        paymentStatus: 'PAID',
+        paymentDate: todayStr,
+        transactionReference: `KC-PAY-${dateCompact}-002`,
+        paymentMethod: 'Government Direct Benefit Transfer (Demo)',
+        createdAt: new Date(Date.now() - 3500000).toISOString(),
+        verifiedAt: new Date(Date.now() - 3400000).toISOString(),
+        scheduleDate: todayStr,
+        timeSlot: '10:00 AM - 12:00 PM',
+        tokenNumber: 'KC-100'
       }
     ],
     notifications: [
       {
         id: 'ntf_1',
-        userId: 'usr_f1',
-        title: 'Booking Confirmed',
-        message: 'Your slot at Nashik APMC for 09:00 AM - 11:00 AM has been confirmed.',
+        userId: 'usr_f3',
+        title: 'Government Payment Processed!',
+        message: `Government payment of ₹${(Math.round(33.5 * wheatMsp * 100) / 100).toLocaleString('en-IN')} recorded for 33.5 Quintals of Wheat (MSP: ₹${wheatMsp}/Qtl). Ref: KC-PAY-${dateCompact}-001`,
         type: 'success',
         read: false,
-        createdAt: new Date(Date.now() - 600000).toISOString()
+        createdAt: new Date(Date.now() - 6900000).toISOString()
       },
       {
         id: 'ntf_2',
-        userId: 'usr_f1',
-        title: 'Digital Token Issued',
-        message: 'Token KC-104 generated successfully. Estimated wait time: 35 minutes.',
-        type: 'info',
+        userId: 'usr_f2',
+        title: 'Government Payment Processed!',
+        message: `Government payment of ₹${(Math.round(21.5 * soybeanMsp * 100) / 100).toLocaleString('en-IN')} recorded for 21.5 Quintals of Soybean (MSP: ₹${soybeanMsp}/Qtl). Ref: KC-PAY-${dateCompact}-002`,
+        type: 'success',
         read: false,
-        createdAt: new Date(Date.now() - 590000).toISOString()
+        createdAt: new Date(Date.now() - 3400000).toISOString()
       }
     ],
     settings: {
       averageProcessingTimeMinutes: 5,
-      currentTokenProcessed: 'KC-097',
-      lastTokenSeq: 104,
-      bookingFeeAmount: 50
+      currentTokenProcessed: 'KC-098',
+      lastTokenSeq: 101,
+      bookingFeeAmount: 0
     }
   };
 };
